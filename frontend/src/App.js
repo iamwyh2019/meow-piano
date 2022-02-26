@@ -1,23 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
+import Keyboard from './keyboard';
+import {useState, useEffect, useCallback} from 'react';
 
 function App() {
+
+  const [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  const onResize = useCallback(() => {
+    setSize({
+      width: window.innerWidth,
+      height: window.innerHeight
+    })
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('resize', onResize);
+    return (() => {
+      window.removeEventListener('resize', onResize);
+    })
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Keyboard width={size.width} height={size.height}/>
     </div>
   );
 }
