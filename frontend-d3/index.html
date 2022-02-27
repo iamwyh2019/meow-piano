@@ -11,6 +11,20 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root">
+        <div id="inputbox">
+            <form id="uploadForm" enctype="multipart/form-data" class="file">
+                Upload music!
+                <input type="file" id="file" name="file" accept=".mp3,.flac,.wav,.wmv"/>
+            </form>
+            <div class="loading" id="loading">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <div id="loadingtext">Please wait while the cats are singing ...</div>
+            </div>
+        </div>
         <svg id="main">
             <g id="keyboard">
                 <g id="cat"></g>
@@ -18,8 +32,10 @@
                 <g id="black"></g>
             </g>
         </svg>
+        <div id="audioplayer"></div>
     </div>
     <script src="js/position.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/ui.js"></script>
   </body>
 </html>

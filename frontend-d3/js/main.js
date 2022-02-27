@@ -66,7 +66,7 @@ function initPage() {
 }
 
 function drawAnimation(midijson) {
-    console.log(midijson.length, "notes");
+    console.log(midijson.length);
 
     const svg = d3.select('#root').select('svg');
     const whites = svg.select('#white').selectAll('rect');
@@ -132,4 +132,4 @@ function drawAnimation(midijson) {
 }
 
 initPage();
-d3.json('data/2.4pv.json').then(drawAnimation);
+//d3.json('data/2.4pv.json').then(drawAnimation);
