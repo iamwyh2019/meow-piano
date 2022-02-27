@@ -81,3 +81,9 @@ html, body {
 .loading span:nth-child(5){
     -webkit-animation-delay:0.8s;
 }
+
+#audioplayer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}

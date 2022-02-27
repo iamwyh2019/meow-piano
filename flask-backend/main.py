@@ -1,10 +1,11 @@
-import os
-from flask import Flask, request, redirect, jsonify
+import os, time
+from flask import Flask, request, redirect, jsonify, url_for
 from flask_cors import CORS
 import random
 from Meow import Meow
 from piano_transcription_inference import PianoTranscription, sample_rate, load_audio
 from scipy.io import wavfile
+import base64
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
 
@@ -19,7 +20,7 @@ app = Flask(__name__, static_folder = './static')
 upl_folder = 'upload'
 app.config['UPLOAD_FOLDER'] = upl_folder
 
-CORS(app)
+CORS(app, resources = r'/*')
 
 transcriptor = PianoTranscription(device='cuda')
 Meow_piano = Meow(allow_changetone = True, allow_highest_tone = 90, 
@@ -53,8 +54,12 @@ def work():
         ele['onset_time'] = ele['onset_time'].item()
         ele['offset_time'] = ele['offset_time'].item()
 
+    with open(songpath, 'rb') as f:
+        data = f.read()
+        b64_data = base64.b64encode(data).decode('utf-8')
+
     return jsonify({
-        'file': newName,
+        'file': b64_data,
         'json': newJson
     })
 
