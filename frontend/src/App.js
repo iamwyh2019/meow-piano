@@ -1,6 +1,7 @@
 import './App.css';
 import Keyboard from './keyboard';
 import {useState, useEffect, useCallback} from 'react';
+import midijson from './snowflake.json';
 
 function App() {
 
@@ -25,7 +26,7 @@ function App() {
 
   return (
     <div className="App">
-      <Keyboard width={size.width} height={size.height}/>
+      <Keyboard width={size.width} height={size.height} midijson={midijson}/>
     </div>
   );
 }
