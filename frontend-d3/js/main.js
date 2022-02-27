@@ -7,7 +7,7 @@ const hWhite = unit*66, hBlack = unit*42;
 const wLeft = (offset) => offset*(wWhite+1)+1;
 const bLeft = (offset) => offset*(wWhite+1)+1-wBlack/2;
 
-const GForce = 50;
+const GForce = 60;
 
 const hitColorW = 'rgba(173, 60, 138, 0.65)';
 const hitColorB = 'rgba(173, 60, 138, 1)';
@@ -92,14 +92,17 @@ function drawAnimation(midijson) {
             .attr('height', catSize)
             .attr('xlink:href', catFile)
             .attr('x', keyR.attr('x'))
-            .attr('y', 0);
+            .attr('y', 0)
+            .attr('opacity', 0);
 
         const intensity = ele.velocity;
-        newCat.speed = -(intensity/128*80+150);
+        newCat.speed = -(intensity/128*140+120);
         const updateGap = 10;
 
         setTimeout(function() {
             keyR.attr('fill', hitColor);
+
+            newCat.attr('opacity', 1);
 
             const catTimer = setInterval(function() {
                 const nowY = parseFloat(newCat.attr('y'));
@@ -108,6 +111,9 @@ function drawAnimation(midijson) {
                     console.log("removed");
                     newCat.remove();
                     clearInterval(catTimer);
+                }
+                else if (nowY > 0) {
+                    newCat.attr('opacity', 0);
                 }
 
                 const nextSpeed = newCat.speed + GForce*updateGap/1000;
