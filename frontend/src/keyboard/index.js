@@ -25,14 +25,9 @@ const Keyboard = ({width, height, midijson}) => {
                 left: wLeft(ele.offset),
             };
             return (
-                <React.Fragment>
-                    <div className="white" style={whiteStyle} key={index}>
-                        <div className="kbnote">{ele.name}</div>
-                    </div>
-                    <Cat className="Cat" cat_width={wWhite} 
-                        left={wLeft(ele.offset)} bottom={catOffset}
-                        key={index+keyboard_layout.length}/>
-                </React.Fragment>
+                <div className="white" style={whiteStyle} key={index}>
+                    <div className="kbnote">{ele.name}</div>
+                </div>
             )
         }
         else {
@@ -43,12 +38,24 @@ const Keyboard = ({width, height, midijson}) => {
                 bottom: hWhite - hBlack + 2,
             };
             return (
-                <React.Fragment>
-                    <div className="black" style={blackStyle} key={index}></div>
-                    <Cat className="Cat" cat_width={wWhite} 
-                        left={bLeft(ele.offset)} bottom={catOffset+hWhite}
-                        key={index+keyboard_layout.length}/>
-                </React.Fragment>
+                <div className="black" style={blackStyle} key={index}></div>
+            )
+        }
+    });
+
+    const cat_eles = keyboard_layout.map((ele, index) => {
+        if (ele.white) {
+            return (
+                <Cat className="Cat" cat_width={wWhite} 
+                    left={wLeft(ele.offset)} bottom={catOffset}
+                    key={index+keyboard_layout.length}/>
+            )
+        }
+        else {
+            return (
+                <Cat className="Cat" cat_width={wWhite} 
+                    left={bLeft(ele.offset)} bottom={catOffset+hWhite}
+                    key={index+keyboard_layout.length}/>
             )
         }
     });
@@ -59,6 +66,7 @@ const Keyboard = ({width, height, midijson}) => {
     return (
         <div className="keyboard">
             {keyboard_eles}
+            {cat_eles}
         </div>
     )
 }
