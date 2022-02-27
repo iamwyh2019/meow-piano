@@ -1,4 +1,4 @@
-const req_url = 'http://localhost:5001';
+const req_url = 'https://iamwyh.cn:5001';
 
 $('#loading').hide();
 

@@ -21,7 +21,7 @@ app.config['UPLOAD_FOLDER'] = upl_folder
 
 CORS(app, resources = r'/*')
 
-transcriptor = PianoTranscription(device='cuda')
+transcriptor = PianoTranscription(device='cpu')
 Meow_piano = Meow(allow_changetone = True, allow_highest_tone = 90, 
     threshold = 0.8, window_interval = 0.1)
 
