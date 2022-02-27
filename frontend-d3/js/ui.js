@@ -26,6 +26,8 @@ $('#file').on('change', function(e) {
                 <audio controls="controls" autoplay="autoplay" id="player">
                     <source src="${req_url}/static/${path}" />
                 </audio>
+                <br/>
+                <span> Download the audio (by right clicking) for better quality! </span>
             `);
 
             $("#player")[0].play();
