@@ -97,7 +97,7 @@ class Meow(object):
         starttime
         endtime
         """
-        output = np.zeros(self.sr * self.last_time)
+        output = np.zeros(self.sr * self.last_time, dtype=np.float64)
 
         for tone in self.tones:
             modified_tone = self.chooseMeow(tone)

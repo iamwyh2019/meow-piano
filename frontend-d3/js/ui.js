@@ -21,16 +21,16 @@ $('#file').on('change', function(e) {
         .done(function(res) {
             $('#loading').hide();
             const midijson = res['json'];
-            const musicstream = res['file'];
+            const path = res['file'];
             $('#audioplayer').html(`
                 <audio controls="controls" autoplay="autoplay" id="player">
-                    <source src="data:audio/wav;base64,${musicstream}" />
+                    <source src="${req_url}/static/${path}" />
                 </audio>
             `);
 
             $("#player")[0].play();
 
-            //drawAnimation(midijson);
+            drawAnimation(midijson);
         })
         .fail(function(res) {
             console.log(res);

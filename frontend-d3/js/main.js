@@ -108,7 +108,6 @@ function drawAnimation(midijson) {
                 const nowY = parseFloat(newCat.attr('y'));
 
                 if (nowY > 0.3*height) {
-                    console.log("removed");
                     newCat.remove();
                     clearInterval(catTimer);
                 }
