@@ -5,6 +5,7 @@ import random
 from Meow import Meow
 from piano_transcription_inference import PianoTranscription, sample_rate, load_audio
 from scipy.io import wavfile
+from gevent import pywsgi
 
 alphabet = 'abcdefghijklmnopqrstuvwxyz1234567890'
 
@@ -21,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = upl_folder
 
 CORS(app, resources = r'/*')
 
-transcriptor = PianoTranscription(device='cpu')
+transcriptor = PianoTranscription(device='cuda')
 Meow_piano = Meow(allow_changetone = True, allow_highest_tone = 90, 
     threshold = 0.8, window_interval = 0.1)
 
@@ -32,7 +33,7 @@ def work():
     f = request.files['file']
     fname, fext = splitName(f.filename)
     tempid = getId()
-    newName = fname + tempid + '.' + fext
+    newName = tempid + '.' + fext
     newPath = os.path.join(upl_folder, newName)
     f.save(newPath)
 
@@ -44,18 +45,18 @@ def work():
     newJson = Meow_piano.transcriptMidijson(notes)
     songlist = Meow_piano.generateSonglist()
 
-    resName = fname + tempid + '.wav'
-    aftName = fname + tempid + '.mp3'
+    resName = tempid + '.wav'
+    aftName = tempid + '.mp3'
 
     songpath = os.path.join('static', resName)
     wavfile.write(songpath, Meow_piano.sr, songlist)
 
     aftPath = os.path.join('static', aftName)
 
-    os.remove(newPath)
-    os.remove(songpath)
-
     os.system(f'ffmpeg -i {songpath} -f mp3 -acodec libmp3lame -y {aftPath}')
+
+    #os.remove(newPath)
+    #os.remove(songpath)
 
     for i in range(len(newJson)):
         ele = newJson[i]
@@ -69,4 +70,5 @@ def work():
 
 
 if __name__ == "__main__":
-    app.run(port = 5001)
+    server = pywsgi.WSGIServer(('0.0.0.0', 5001), app,)
+    server.serve_forever()
