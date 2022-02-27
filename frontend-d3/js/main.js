@@ -7,8 +7,16 @@ const hWhite = unit*66, hBlack = unit*42;
 const wLeft = (offset) => offset*(wWhite+1)+1;
 const bLeft = (offset) => offset*(wWhite+1)+1-wBlack/2;
 
+const GForce = 50;
+
 const hitColorW = 'rgba(173, 60, 138, 0.65)';
 const hitColorB = 'rgba(173, 60, 138, 1)';
+
+const allCats = ['blue', 'green', 'orange', 'pink', 'red', 'sky'];
+const getCat = () => {
+    const catCol = allCats[Math.floor(Math.random() * allCats.length)];
+    return `assets/${catCol}.png`;
+}
 
 function initPage() {
     const svg = d3.select('#root').select('svg')
@@ -58,23 +66,57 @@ function initPage() {
 }
 
 function drawAnimation(midijson) {
+    console.log(midijson.length, "notes");
+
     const svg = d3.select('#root').select('svg');
     const whites = svg.select('#white').selectAll('rect');
     const blacks = svg.select('#black').selectAll('rect');
+    const cats = svg.select('#cat');
 
     midijson.forEach(ele => {
         const keyid = ele.midi_note - 21;
 
-        // Try find it
         let keyR = whites.filter(d => d.index == keyid);
-        let hitColor = hitColorW;
+        let isWhite = true;
         if (keyR.nodes().length === 0) {
             keyR = blacks.filter(d => d.index == keyid);
-            hitColor = hitColorB;
+            isWhite = false;
         }
+
+        const hitColor = isWhite? hitColorW: hitColorB;
+        const catSize = isWhite? wWhite: wBlack;
+
+        const catFile = getCat();
+        const newCat = cats.append('image')
+            .attr('width', catSize)
+            .attr('height', catSize)
+            .attr('xlink:href', catFile)
+            .attr('x', keyR.attr('x'))
+            .attr('y', 0);
+
+        const intensity = ele.velocity;
+        newCat.speed = -(intensity/128*80+150);
+        const updateGap = 10;
 
         setTimeout(function() {
             keyR.attr('fill', hitColor);
+
+            const catTimer = setInterval(function() {
+                const nowY = parseFloat(newCat.attr('y'));
+
+                if (nowY > 0.3*height) {
+                    console.log("removed");
+                    newCat.remove();
+                    clearInterval(catTimer);
+                }
+
+                const nextSpeed = newCat.speed + GForce*updateGap/1000;
+                const nextY = nowY + (newCat.speed + nextSpeed)/2 * updateGap / 1000;
+                newCat.attr('y', nextY);
+                newCat.speed = nextSpeed;
+
+            }, updateGap);
+
         }, ele.onset_time * 1000);
 
         setTimeout(function() {
@@ -84,4 +126,4 @@ function drawAnimation(midijson) {
 }
 
 initPage();
-d3.json('data/snowflake.json').then(drawAnimation);
+d3.json('data/2.4pv.json').then(drawAnimation);
