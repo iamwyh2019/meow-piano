@@ -6,7 +6,7 @@ import scipy.signal as ss
 import matplotlib.pyplot as plt
 from utils import fft_spectrum
 
-y, sr = librosa.load("./sound/cat1.wav")
+y, sr = librosa.load("./sound/82/1.wav")
 
 
 freqs, magnitudes = fft_spectrum(y, sr)
