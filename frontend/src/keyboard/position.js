@@ -93,7 +93,6 @@ const keyboard_layout = [
     {name: 'A8', white: true, offset: 49},
     {name: 'A#8', white: false, offset: 50},
     {name: 'B8', white: true, offset: 50},
-    {name: 'C8', white: true, offset: 50},
 ]
 
 export default keyboard_layout

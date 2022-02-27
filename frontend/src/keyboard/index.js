@@ -1,6 +1,7 @@
 import './keyboard.css'
-import {useState, useEffect} from 'react'
 import keyboard_layout from './position'
+import Cat from './cats';
+import React, { useEffect, useState } from 'react';
 
 const Keyboard = ({width, height, midijson}) => {
     // white : black = 39:27 = 13:9
@@ -11,30 +12,49 @@ const Keyboard = ({width, height, midijson}) => {
     const unit = (width-54) / 663;
     const wWhite = unit*13, wBlack = unit*9;
     const hWhite = unit*66, hBlack = unit*42;
+    const catOffset = height/10 + hWhite;
+
+    const wLeft = (offset) => offset*(wWhite+1)+1;
+    const bLeft = (offset) => offset*(wWhite+1)+2-wBlack/2;
 
     const keyboard_eles = keyboard_layout.map((ele, index) => {
         if (ele.white) {
             const whiteStyle = {
                 width: wWhite,
                 height: hWhite,
-                left: ele.offset*(wWhite+1) + 1,
+                left: wLeft(ele.offset),
             };
             return (
-                <div className="white" style={whiteStyle} key={index}>
-                    <div className="kbnote">{ele.name}</div>
-                </div>
+                <React.Fragment>
+                    <div className="white" style={whiteStyle} key={index}>
+                        <div className="kbnote">{ele.name}</div>
+                    </div>
+                    <Cat className="Cat" cat_width={wWhite} 
+                        left={wLeft(ele.offset)} bottom={catOffset}
+                        key={index+keyboard_layout.length}/>
+                </React.Fragment>
             )
         }
         else {
             const blackStyle = {
                 width: wBlack,
                 height: hBlack,
-                left: ele.offset*(wWhite+1) + 2 - wBlack/2,
-                bottom: (hWhite-hBlack+2) + 'px',
+                left: bLeft(ele.offset),
+                bottom: hWhite - hBlack + 2,
             };
-            return <div className="black" style={blackStyle} key={index}></div>
+            return (
+                <React.Fragment>
+                    <div className="black" style={blackStyle} key={index}></div>
+                    <Cat className="Cat" cat_width={wWhite} 
+                        left={bLeft(ele.offset)} bottom={catOffset+hWhite}
+                        key={index+keyboard_layout.length}/>
+                </React.Fragment>
+            )
         }
     });
+
+    const duration = Math.max(...midijson.map(d => d.offset_time));
+
 
     return (
         <div className="keyboard">
