@@ -4,13 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
-a = np.array([1,2,10])
-b = np.array([1,2,3,4])
-c = []
-c.append(a)
-c.append(b)
-print(np.array(c).shape)
-
-b.reshape(12)
-print(b)
+for i in range(0,10,2):
+    print(i)
 
