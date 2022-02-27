@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 from Meow import Meow
 
 
-Meaw_piano = Meow()
-with open("./data/2.4pv.json") as f:
+with open("./data/smile.json") as f:
     midijson = json.load(f)
 
 
-tones, velocity_amplitude_lists = Meaw_piano.transcriptMidijson(midijson)
-songlist = Meaw_piano.generateSonglist(tones, velocity_amplitude_lists)
+Meaw_piano = Meow(allow_changetone = True, allow_highest_tone = 90, threshold = 0.8, window_interval = 0.1)
+Meaw_piano.transcriptMidijson(midijson)
+songlist = Meaw_piano.generateSonglist()
 
-wavfile.write("./output/2.4pv.mp3", Meaw_piano.sr, songlist)
+wavfile.write("./output/smile2.mp3", Meaw_piano.sr, songlist)

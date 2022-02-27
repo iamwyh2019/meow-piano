@@ -1,3 +1,4 @@
+from threading import local
 import librosa
 import numpy as np
 import scipy.signal as ss
@@ -6,9 +7,19 @@ import random
 
 class Meow(object):
 
-    def __init__(self, sr = 44100, last_time = 10) -> None:
+    def __init__(self, sr = 44100, allow_changetone = True, allow_highest_tone = 95, threshold = 0.5, window_interval = 0.1) -> None:
         self.sr = sr
-        self.last_time = last_time
+
+        # the Main Theme filter
+        self.threshold = threshold
+        self.window_interval = window_interval
+
+        # the tone change
+        self.allow_changetone = allow_changetone
+        self.allow_highest_tone = allow_highest_tone
+
+
+
         soundlist = os.listdir("./sound")
         self.tonedic = {}
         for sound in soundlist:
@@ -31,7 +42,12 @@ class Meow(object):
         1. tones: np.1darray, contains all the tones detected
         2. velocity_time_lists: dictionary of {tones: velocity_time_list} contains the start time and amptitude of each tone
         """
-        self.last_time = max(int(midijson[-1]["offset_time"]) + 2, self.last_time)
+        self.last_time = int(midijson[-1]["onset_time"]) + 1
+
+        print(len(midijson))
+        midijson = self.adjustMidijson(midijson)
+        print(len(midijson))
+
         tones = []
         velocity_time_lists = {}
         for note in midijson:
@@ -45,27 +61,40 @@ class Meow(object):
                 tones.append(tone)
                 velocity_time_lists[tone] = np.zeros(self.last_time * self.sr,)
                 velocity_time_lists[tone][int(onset_time * self.sr)] = velocity
-            
 
-        # self.tones = tones
-        # self.velocity_time_lists = velocity_time_lists
+        self.tones = tones
+        self.velocity_time_lists = velocity_time_lists
 
-        return tones, velocity_time_lists
-    
-    def pickMainTheme(self, windowinterval = 0.1, keepratio = 0.5):
-        stepsize = int(self.sr * windowinterval / 2)
-        windowsize = stepsize * 2
-        velocity_time_matrix = np.zeros([len[self.tones], self.last_time * self.sr])
-        for i in range(len(self.tones)):
-            velocity_time_matrix[i,:] = self.velocity_time_lists[self.tones[i]]
+    def adjustMidijson(self, midijson):
+        local_velocity = np.zeros(self.last_time * self.sr,)
+        highest_tone = 0
+        for note in midijson:
+            tone = int(note["midi_note"])
+            highest_tone = max(highest_tone, tone)
+            onset_time = float(note["onset_time"])
+            velocity = int(note["velocity"])
+            local_velocity[int(onset_time * self.sr)] = max(velocity, local_velocity[int(onset_time * self.sr)])
         
-        for i in range(0, velocity_time_matrix.shape[1] - windowsize, stepsize):
-            threshold = np.sum(velocity_time_matrix[i:i+windowsize, :])
+        if (highest_tone > self.allow_highest_tone) and self.allow_changetone:
+            print(highest_tone)
+            lower_number = highest_tone - self.allow_highest_tone
+        else:
+            lower_number = 0
+        
+        new_midijson = []
+        for note in midijson:
+            onset_time = float(note["onset_time"])
+            velocity = int(note["velocity"])
+            if velocity > self.threshold * np.max(local_velocity[max(0, int((onset_time - self.window_interval/2) * self.sr)) : int(min(self.last_time, onset_time + self.window_interval/2) * self.sr)]):
+                note["midi_note"] = str(int(note["midi_note"]) - lower_number)
+                new_midijson.append(note)
+
+        return new_midijson
+
+        
 
 
-
-
-    def generateSonglist(self, tones, amplitude_time_lists) -> np.ndarray:
+    def generateSonglist(self) -> np.ndarray:
         """
         tone
         amplitude
@@ -74,11 +103,11 @@ class Meow(object):
         """
         output = np.zeros(self.sr * self.last_time)
 
-        for tone in tones:
-            modified_tone = self.chooseMeow(tone-12)
+        for tone in self.tones:
+            modified_tone = self.chooseMeow(tone)
             if modified_tone is None:
                 continue
-            this_amplitude_time_list = amplitude_time_lists[tone]
+            this_amplitude_time_list = self.velocity_time_lists[tone]
             this_tone_output = ss.convolve(modified_tone, this_amplitude_time_list)[:output.shape[0]]
             output += this_tone_output
 
@@ -97,6 +126,7 @@ class Meow(object):
         chosen_file = random.choice(tone_files)
         this_tone, sr = librosa.load("./sound/{}".format(chosen_file), sr = self.sr)
         modified_tone = librosa.effects.pitch_shift(this_tone, self.sr, n_steps = tone - chosen_tone)
+
         return modified_tone
 
     # def chooseMeow(self, tone):
