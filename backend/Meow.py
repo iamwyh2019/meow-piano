@@ -45,8 +45,25 @@ class Meow(object):
                 tones.append(tone)
                 velocity_time_lists[tone] = np.zeros(self.last_time * self.sr,)
                 velocity_time_lists[tone][int(onset_time * self.sr)] = velocity
+            
+
+        # self.tones = tones
+        # self.velocity_time_lists = velocity_time_lists
 
         return tones, velocity_time_lists
+    
+    def pickMainTheme(self, windowinterval = 0.1, keepratio = 0.5):
+        stepsize = int(self.sr * windowinterval / 2)
+        windowsize = stepsize * 2
+        velocity_time_matrix = np.zeros([len[self.tones], self.last_time * self.sr])
+        for i in range(len(self.tones)):
+            velocity_time_matrix[i,:] = self.velocity_time_lists[self.tones[i]]
+        
+        for i in range(0, velocity_time_matrix.shape[1] - windowsize, stepsize):
+            threshold = np.sum(velocity_time_matrix[i:i+windowsize, :])
+
+
+
 
     def generateSonglist(self, tones, amplitude_time_lists) -> np.ndarray:
         """
@@ -58,7 +75,9 @@ class Meow(object):
         output = np.zeros(self.sr * self.last_time)
 
         for tone in tones:
-            modified_tone = self.chooseMeow(tone)
+            modified_tone = self.chooseMeow(tone-12)
+            if modified_tone is None:
+                continue
             this_amplitude_time_list = amplitude_time_lists[tone]
             this_tone_output = ss.convolve(modified_tone, this_amplitude_time_list)[:output.shape[0]]
             output += this_tone_output
@@ -67,19 +86,16 @@ class Meow(object):
 
     def chooseMeow(self, tone):
         distance = np.abs(self.tonelist - tone)
-        optional = self.tonelist[distance <= 10]
+        optional = self.tonelist[distance <= 6]
         if optional.shape[0] == 0:
             chosen_tone = self.tonelist[np.argmin(distance)]
+            # return None
         else:
             chosen_tone = np.random.choice(optional)
         
         tone_files = self.tonedic[chosen_tone]
         chosen_file = random.choice(tone_files)
-        this_tone, sr = librosa.load("./sound/{}".format(chosen_file))
-        # resample in case the sample rate of the sound file does not match the output file
-        if sr != self.sr:
-            resample_number = int(this_tone.shape[0] / sr * self.sr)
-            this_tone = ss.resample(this_tone, resample_number)
+        this_tone, sr = librosa.load("./sound/{}".format(chosen_file), sr = self.sr)
         modified_tone = librosa.effects.pitch_shift(this_tone, self.sr, n_steps = tone - chosen_tone)
         return modified_tone
 
